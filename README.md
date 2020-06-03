@@ -18,27 +18,26 @@ Length of time song is on the chart in relation to genre, artist age, country. O
 ## Inspiration visualization
 
 1. Line graph showing song growth: superposition of all song life-lines from first entry to the chart until last exit (there might be reentries). (rank vs weeks)
-
-|---|---|
-|![Multiple lines][images/lines.png]|![Single line][images/line.png]|
+| Superposition | Single |
+| ------------- | ------ |
+| ![Multiple lines](images/lines.png) | ![Single line](images/line.png) |
 
 2. Genre information: each bubble is a genre and bubbles inside are artists/songs (size will represent popularity)- zoomable sunburst & zoomable circle packing -- plotly
 
-|---|---|
-|![Sunrays][images/sunrays.jpg]|![Bubbles][images/bubbles.jpg]|
+| Sunburst | Bubbles |
+| -------- | ------- |
+| ![Sunrays](images/sunrays.jpg) | ![Bubbles](images/bubbles.jpg) |
 
 3. Timeline of artist-- singles that made the chart (each bar is single- height of bar is how long it was popular)
 
 4. Word cloud: get a numerical metric to measure an artist’s success and create a word cloud of popular music
 
-![Word cloud][images/words.png]
+![Word cloud](images/words.png)
 
 5. Bar chart for genre/gender(male, female, band) (stacked to group bar chart)
 
-![Bars][images/bars.jpg]
+![Bars](images/bars.jpg)
 
 ## A sketch of the final design
 
 *To do...*
-
-
