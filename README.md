@@ -12,11 +12,21 @@ Length of time song is on the chart in relation to genre, artist age, country. O
 ## Link to datasets
 
 * Candian top singles: [Data from 2007 to current week (updated weekly)](https://acharts.co/canada_singles_top_100#archive)
+  * Pages are accessed via URLs in the form `https://acharts.co/canada_singles_top_100/{year}/{week}` and then scraped using splinter library
+  * For each line in the Top-list the scraper gets chart position, song name and song performer
+  * Then, the song performer is split using HTML markup into a list of artists and bands that collaborated on this song
+  * This information is saved into the SQLite database and becomes the foundation of further data scraping
 
-* Artist information: Genre, age, photo etc. Wikipedia Splinter query. Example: [Billie Eilish](https://en.wikipedia.org/wiki/Billie_Eilish)
+* Artist information: Genre, age, photo etc. is obtained by scraping Wikipedia pages with Splinter library.
+  * First stage is to form a list of URLs to wikipedia pages using Wikipedia and Google search
+  * Second stage is by using that list of URLs open Wikipedia page, detect if it is a person or a band and scrape information
+  * The detection is done by analizing a side table wich is present on every page
+  * Example page of an artist: [Billie Eilish](https://en.wikipedia.org/wiki/Billie_Eilish)
+  * Example page of a band: [Surfaces](https://en.wikipedia.org/wiki/Surfaces_(band))
 
-* Saving data to SQLite Database
-
+* Flask server provides interface between the Database and the Front end by means of endpoints
+  * Each endpoint returns data specific to the task: a chart, a list, a search query
+  * On the database side common queries are implemented as Views to ease the access
 
 ## Inspiration visualization
 
@@ -47,6 +57,3 @@ Length of time song is on the chart in relation to genre, artist age, country. O
 ![Bars](images/bars.jpg)
 
 
-## A sketch of the final design
-
-*To do...*
