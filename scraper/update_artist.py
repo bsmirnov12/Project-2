@@ -34,7 +34,7 @@ session = Session(engine)
 
 # Function returns the list of URLs to Wikipedia pages
 def get_wikilinks():
-    return session.query(WikiLinks).filter(WikiLinks.url != None).all()
+    return session.query(WikiLinks.artist_id, WikiLinks.url).filter(WikiLinks.url != None).all()
 
 # Function updates Artist table with scraped data
 def update_artist(artist_id, url, data):
@@ -89,10 +89,11 @@ for link in links:
     # I Suppose it returns a dictionary as in above examples or None if scraping failed
     data = scrape_wikipedia(url)
 
-    if res is not None:
+    if data is not None:
         update_artist(artist_id, url, data)
         print(f"Artist id={artist_id} updated")
     else:
         print(f"Artist id={artist_id} scraping failed")
 
 print("Done")
+
