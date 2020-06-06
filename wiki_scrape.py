@@ -4,24 +4,24 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 
-url= "https://en.wikipedia.org/wiki/The_Black_Eyed_Peas"
+url= "https://en.wikipedia.org/wiki/Lil_Wayne"
 
 # ---------------------------------
 # Step 1: Get Info Table
 req = requests.get(url)
 soup = BeautifulSoup(req.content, 'html.parser')
 artist_table=soup.find('table', class_='infobox')
-# artist_table
 
+# Get Image info
 table_img=artist_table.find('img')['src']
 image_src= 'https:'+ table_img
-print(image_src)
+# print(image_src)
 
+# set up empty dictionary(s) for band or artist
 band_dict= {'Origin':'null', 
              'Genres':'null'
              }
-artist_dict= { 
-             'Genres':'null',
+artist_dict= {'Genres':'null',
             'Born':'null',
              }
 
