@@ -1,0 +1,52 @@
+# UT-TOR-DATA-PT-01-2020-U-C Group Project 2
+# (c) Boris Smirnov
+# ---------------------------------
+# By default SQLite doesn't enfoce foreign key constraints.
+# Use "PRAGMA foreign_keys=on;" to overcome this
+
+# Every song is uniquely identified by name and performer (which might be several bands/musicians)
+Song as s
+------------
+# id - synthetic key used for referencing
+id INTEGER IDENTITY PK
+# First part of UNIQUE constraint
+song_name TEXT
+# Second part of UNIQUE constraint
+# It is a string as visible on the web page. However, for collaborations it actually consistes of several parts - each for one performer, which is visible during scraping. Later each performer is saved separately and its order in the list is saved too.
+performed_by TEXT
+
+# A musician or a band. Name is derived from charts website. Other info should be scraped from Wikipedia.
+# Probably will have to make special admin page to help fill some info by hand
+Artist as p
+--------------
+id INTEGER PK
+name TEXT UNIQUE
+is_band INT NULLABLE
+genre TEXT NULLABLE
+image TEXT NULLABLE
+wiki TEXT NULLABLE
+dob TEXT NULLABLE
+origin TEXT NULLABLE
+
+# The table is necessary because many songs are created in collaboraton by several artists. Those performers are listed on the web page which is seen during scraping. The ordinal number of an artist in this list is saved in "order" column. The value starts with 0.
+# Example of multiartist strings: "Dan featuring Shay and Justin Bieber"
+# Create using 'WITHOUT ROWID' because of the composite PK
+Performed_by as pb
+------------------
+song_id INT PK FK >- Song.id
+artist_id INT PK FK >- Artist.id
+# Ordinal number of the performer in Song.performed_by string 
+order INT
+
+# Create using 'WITHOUT ROWID' because of the composite PK
+# Index by song_id
+Chart as c
+----------
+year INT PK
+week INT PK
+position INT PK
+song_id INT FK >- Song.id
+# Computed column. Probably should be indexed.
+# Create as: score INT GENERATED ALWAYS AS (101 - position) VIRTUAL
+# N.B. Requires SQLite version 3.31.0 (2020-01-22) - new feature!
+#score INT
