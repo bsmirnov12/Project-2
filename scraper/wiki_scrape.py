@@ -26,10 +26,15 @@ def scrape_wikipedia(url):
         # If statement to differentiate bands/artist:
         if artist_table.find(text = "Members"):
             print('Band---')
-            # Get Image info
-            table_img=artist_table.find('img')['src']
-            image_src= 'https:'+ table_img
-            # print(image_src)
+            # Get Image info (if no image available return 'none')
+            try:
+                table_img=artist_table.find('img')['src']
+                image_src= 'https:'+ table_img
+            except TypeError as error:
+                print(error,': No image available')
+                image_src = None
+
+            print(image_src)
             for item in band_dict:
                 row_text=artist_table.tr.find_next('th', string=item, scope='row').find_next('td').find_next('a').text
                 band_dict.update({item: row_text})
@@ -41,10 +46,13 @@ def scrape_wikipedia(url):
             
         elif artist_table.find(text = "Born"):
             print('Artist---')
-            # Get Image info
-            table_img=artist_table.find('img')['src']
-            image_src= 'https:'+ table_img
-            # print(image_src)
+            # Get Image info (if no image available return 'none')
+            try:
+                table_img=artist_table.find('img')['src']
+                image_src= 'https:'+ table_img
+            except TypeError as error:
+                print(error,': No image available')
+                image_src= None
 
             for item in artist_dict:
                 
