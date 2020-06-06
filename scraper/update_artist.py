@@ -34,7 +34,11 @@ session = Session(engine)
 
 # Function returns the list of URLs to Wikipedia pages
 def get_wikilinks():
-    return session.query(WikiLinks.artist_id, WikiLinks.url).filter(WikiLinks.url != None).all()
+    scraped_ids = session.query(Artist.id).filter(Artist.is_band != None)
+    return session.query(WikiLinks.artist_id, WikiLinks.url).\
+        filter(WikiLinks.artist_id.notin_(scraped_ids)).\
+        filter(WikiLinks.url != None).\
+        all()
 
 # Function updates Artist table with scraped data
 def update_artist(artist_id, url, data):
