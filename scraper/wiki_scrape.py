@@ -61,4 +61,3 @@ def scrape_wikipedia(url):
         print('Error has occured: ', error)
         return(None)
 
-scrape_wikipedia('https://en.wikipedia.org/wiki/Little_Mix')
