@@ -13,41 +13,52 @@ def scrape_wikipedia(url):
     soup = BeautifulSoup(req.content, 'html.parser')
     artist_table=soup.find('table', class_='infobox')
 
-    # Get Image info
-    table_img=artist_table.find('img')['src']
-    image_src= 'https:'+ table_img
-    # print(image_src)
-
     # set up empty dictionary(s) for band or artist
-    band_dict= {'Origin':'null', 
-                'Genres':'null'
+    band_dict= {'Origin':None, 
+                'Genres':None
                 }
-    artist_dict= {'Genres':'null',
-                'Born':'null',
+    artist_dict= {'Genres':None,
+                'Born':None,
                 }
 
-    # If statement to differentiate bands/artist:
-    if artist_table.find(text = "Members"):
-        print('Band---')
-        
-        for item in band_dict:
-            row_text=artist_table.tr.find_next('th', string=item, scope='row').find_next('td').find_next('a').text
-            band_dict.update({item: row_text})
-        
-        
-        band_dict.update({'img':image_src,'is_band':1})
-        print(band_dict)
-        
-    else:
-        print('Artist---')
-        for item in artist_dict:
+    # try and except block if wiki link not available/not working as anticipated
+    try:
+        # If statement to differentiate bands/artist:
+        if artist_table.find(text = "Members"):
+            print('Band---')
+            # Get Image info
+            table_img=artist_table.find('img')['src']
+            image_src= 'https:'+ table_img
+            # print(image_src)
+            for item in band_dict:
+                row_text=artist_table.tr.find_next('th', string=item, scope='row').find_next('td').find_next('a').text
+                band_dict.update({item: row_text})
             
-            row_text=artist_table.tr.find_next('th', string=item, scope='row').find_next('td').find_next('a').text
-            artist_dict.update({item: row_text})
-        
-        bday= artist_table.tr.find_next(class_='bday').text
+            
+            band_dict.update({'img':image_src,'is_band':1})
+            print(band_dict)
+            return(band_dict)
+            
+        elif artist_table.find(text = "Born"):
+            print('Artist---')
+            # Get Image info
+            table_img=artist_table.find('img')['src']
+            image_src= 'https:'+ table_img
+            # print(image_src)
 
-        artist_dict.update({'img':image_src, 'is_band':0, 'DOB':bday})
-        print(artist_dict)
+            for item in artist_dict:
+                
+                row_text=artist_table.tr.find_next('th', string=item, scope='row').find_next('td').find_next('a').text
+                artist_dict.update({item: row_text})
+            
+            bday= artist_table.tr.find_next(class_='bday').text
 
-scrape_wikipedia('https://en.wikipedia.org/wiki/Lil_Wayne')
+            artist_dict.update({'img':image_src, 'is_band':0, 'DOB':bday})
+            print(artist_dict)
+            return (artist_dict)
+    
+    except AttributeError as error:
+        print('Error has occured: ', error)
+        return(None)
+
+scrape_wikipedia('https://en.wikipedia.org/wiki/Little_Mix')

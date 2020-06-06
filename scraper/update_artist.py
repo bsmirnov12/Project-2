@@ -80,6 +80,8 @@ def update_artist(artist_id, url, data):
 
 # Main scraping loop
 links = get_wikilinks()
+from wiki_scrape import scrape_wikipedia
+
 for link in links:
     link_dct = link._asdict()
     artist_id = link_dct['artist_id']
@@ -89,7 +91,7 @@ for link in links:
     # I Suppose it returns a dictionary as in above examples or None if scraping failed
     data = scrape_wikipedia(url)
 
-    if res is not None:
+    if data is not None:
         update_artist(artist_id, url, data)
         print(f"Artist id={artist_id} updated")
     else:
