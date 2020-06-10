@@ -146,7 +146,7 @@ def get_evolution():
     for d in data:
         if d.song_id != song_id: # new song encountered
             # 1. save previous song
-            if song_id != -1:
+            if song_id != 0:
                 data_lst.append(song_data)
             # 2. start collecting data for new song
             song_id = d.song_id
