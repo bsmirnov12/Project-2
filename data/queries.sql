@@ -44,7 +44,7 @@ SELECT song_id,
 
 -- Histogramm: How long a song is usually on the top
 SELECT song_id,
-       count(song_id) AS in_top
+       count(song_id) AS week_count
   FROM Chart
  WHERE song_id NOT IN (
            SELECT song_id
@@ -65,16 +65,16 @@ SELECT song_id,
        )
  GROUP BY song_id
  ORDER BY total_score DESC
- LIMIT 25;
+ LIMIT 25; -- can be a parameter
 
 
 -- Longest in the chart (song)
 SELECT song_id AS id,
-       count(song_id) AS weeks_count
+       count(song_id) AS week_count
   FROM Chart
  GROUP BY song_id
  ORDER BY weeks_count DESC
- LIMIT 25;
+ LIMIT 25; -- can be a parameter
 
 
 -- See other queries as views: ArtistRating, ArtistWeeks, SongEvolution

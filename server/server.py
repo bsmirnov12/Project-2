@@ -8,7 +8,7 @@ import sqlalchemy
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy import create_engine, event, MetaData, Table, func
+from sqlalchemy import create_engine, event, MetaData, Table, func, desc
 
 #################################################
 # Flask Setup
@@ -54,6 +54,8 @@ Song = AutomapBase.classes.Song
 meta = MetaData()
 SongEvolution = Table('SongEvolution', meta, autoload=True, autoload_with=engine)
 SkipSongs = Table('SkipSongs', meta, autoload=True, autoload_with=engine)
+ArtistRating = Table('ArtistRating', meta, autoload=True, autoload_with=engine)
+ArtistWeeks = Table('ArtistWeeks', meta, autoload=True, autoload_with=engine)
 
 #################################################
 # Flask Routes
@@ -114,9 +116,41 @@ def get_song(song_id):
         f.abort(404, description=f"Song with id={song_id} was not found in the database")
 
 
+# Query a list of songs
+# Mandatory parameter: ids - a list of comma separated sonf ids
+# Returns a list of songs
+@app.route('/api/v1.0/songs')
+def get_songs():
+    try:
+        ids_str = request.args.get('ids')
+        ids = [int(id) for id in ids_str.split(',')]
+    except:
+        ids = []
+
+    session = Session()
+    songs = session.query(Song).filter(Song.id.in_(ids)).all()
+
+    songs_lst = []
+    for song in songs:
+        song_dct = dict(song.__dict__)
+        del song_dct['_sa_instance_state']
+        song_dct['performers'] = []
+
+        performers = session.query(Performed_by.artist_id).filter_by(song_id = song.id)
+        artists = session.query(Artist).filter(Artist.id.in_(performers))
+        for a in artists:
+            a_dct = dict(a.__dict__)
+            del a_dct['_sa_instance_state']
+            song_dct['performers'].append(a_dct)
+        
+        songs_lst.append(song_dct)
+
+    return jsonify(songs_lst)
+
+
 # Query arbitrary artist
 @app.route('/api/v1.0/artist/<int:artist_id>')
-def get_atist(artist_id):
+def get_artist(artist_id):
     session = Session()
     artist = session.query(Artist).filter_by(id = artist_id).one_or_none()
 
@@ -127,6 +161,28 @@ def get_atist(artist_id):
     else:
         f.abort(404, description=f"Artist with id={artist_id} was not found in the database")
 
+
+# Query a list of artists
+# Mandatory parameter: ids - a list of comma separated artist ids
+# Returns a list of songs
+@app.route('/api/v1.0/artists')
+def get_artists():
+    try:
+        ids_str = request.args.get('ids')
+        ids = [int(id) for id in ids_str.split(',')]
+    except:
+        ids = []
+
+    session = Session()
+    artists = session.query(Artist).filter(Artist.id.in_(ids)).all()
+
+    artists_lst = []
+    for artist in artists:
+        artist_dct = dict(artist.__dict__)
+        del artist_dct['_sa_instance_state']
+        artists_lst.append(artist_dct)
+
+    return jsonify(artists_lst)
 
 # Get data for "Song Evolution" line chart
 # Parameters:
@@ -185,7 +241,6 @@ def get_evolution():
 @app.route('/api/v1.0/scatter')
 def get_scatter():
     session = Session()
-
     # SELECT song_id,
     #        count(song_id) AS week_count,
     #        min(position) AS top_position
@@ -195,7 +250,6 @@ def get_scatter():
     #              FROM SkipSongs
     #        )
     #  GROUP BY song_id;
-
     skip_ids = session.query(SkipSongs.c.song_id)
     data = session.query(
             Chart.song_id,
@@ -215,6 +269,267 @@ def get_scatter():
             'week_count': d.week_count
         }
         data_lst.append(song_dct)
+
+    return jsonify(data_lst)
+
+
+# Get data for "Week count histogram"
+# [week_count]
+@app.route('/api/v1.0/weekshist')
+def get_weekhist():
+    session = Session()
+    # SELECT song_id,
+    #        count(song_id) AS week_count
+    #   FROM Chart
+    #  WHERE song_id NOT IN (
+    #            SELECT song_id
+    #              FROM SkipSongs
+    #        )
+    #  GROUP BY song_id;
+    skip_ids = session.query(SkipSongs.c.song_id)
+    data = session.query(
+            Chart.song_id,
+            func.count(Chart.song_id).label('week_count')).\
+        filter(Chart.song_id.notin_(skip_ids)).\
+        group_by(Chart.song_id)
+
+    if not data:
+        f.abort(404, description=f"Couldn't get data for the Weeks histogram")
+
+    data_lst = []
+    for d in data:
+        data_lst.append(d.week_count)
+
+    return jsonify(data_lst)
+
+
+# Get data for "Top position histogram"
+# [top_position]
+@app.route('/api/v1.0/tophist')
+def get_tophist():
+    session = Session()
+    # SELECT song_id,
+    #        min(position) AS top_position
+    #   FROM Chart
+    #  WHERE song_id NOT IN (
+    #            SELECT id
+    #              FROM SkipSongs
+    #        )
+    #  GROUP BY song_id;
+    skip_ids = session.query(SkipSongs.c.song_id)
+    data = session.query(
+            Chart.song_id,
+            func.min(Chart.position).label('top_position')).\
+        filter(Chart.song_id.notin_(skip_ids)).\
+        group_by(Chart.song_id)
+
+    if not data:
+        f.abort(404, description=f"Couldn't get data for the Top position histogram")
+
+    data_lst = []
+    for d in data:
+        data_lst.append(d.top_position)
+
+    return jsonify(data_lst)
+
+
+# Get data for "Weeks in Top 1 position histogram"
+# [week_count]
+@app.route('/api/v1.0/weekstop1hist')
+def get_weekstophist():
+    session = Session()
+    # SELECT song_id,
+    #        count(song_id) AS week_count
+    #   FROM Chart
+    #  WHERE song_id NOT IN (
+    #            SELECT song_id
+    #              FROM SkipSongs
+    #        )
+    # AND 
+    #        position = 1
+    #  GROUP BY song_id;
+    skip_ids = session.query(SkipSongs.c.song_id)
+    data = session.query(
+            Chart.song_id,
+            func.count(Chart.position).label('week_count')).\
+        filter(Chart.song_id.notin_(skip_ids)).\
+        filter_by(position=1).\
+        group_by(Chart.song_id)
+
+    if not data:
+        f.abort(404, description=f"Couldn't get data for the Weeks in Top 1 position histogram")
+
+    data_lst = []
+    for d in data:
+        data_lst.append(d.week_count)
+
+    return jsonify(data_lst)
+
+
+# Get data for "The most successful songs" chart
+# Parameter: limit - return only top limit songs
+# [{
+#       'song_id': d.song_id,
+#       'total_score': d.total_score
+# }]
+@app.route('/api/v1.0/topsongs')
+def get_topsongs():
+    session = Session()
+    # SELECT song_id,
+    #        sum(101 - position) AS total_score
+    #   FROM Chart
+    #  WHERE song_id NOT IN (
+    #            SELECT song_id
+    #              FROM SkipSongs
+    #        )
+    #  GROUP BY song_id
+    #  ORDER BY total_score DESC
+    #  LIMIT 25; -- can be a parameter
+    try:
+        limit = int(request.args.get('limit'))
+        if limit < 1:
+            limit = None
+    except:
+        limit = None
+
+    skip_ids = session.query(SkipSongs.c.song_id)
+    data = session.query(
+            Chart.song_id,
+            func.sum(101-Chart.position).label('total_score')).\
+        filter(Chart.song_id.notin_(skip_ids)).\
+        group_by(Chart.song_id).\
+        order_by(desc('total_score'))[:limit]
+
+    if not data:
+        f.abort(404, description=f"Couldn't get data for the Top Songs chart")
+
+    data_lst = []
+    for d in data:
+        data_lst.append({
+            'song_id': d.song_id,
+            'total_score': d.total_score
+        })
+
+    return jsonify(data_lst)
+
+
+# Get data for "The longest playing songs"
+# Parameter: limit - return only top limit songs
+# [{
+#       'song_id': d.song_id,
+#       'weeks_count': d.week_count
+# }]
+@app.route('/api/v1.0/weeksintop')
+def get_weeksintop():
+    session = Session()
+    # SELECT song_id AS id,
+    #        count(song_id) AS weeks_count
+    #   FROM Chart
+    #  GROUP BY song_id
+    #  ORDER BY weeks_count DESC
+    #  LIMIT 25; -- can be a parameter
+    try:
+        limit = int(request.args.get('limit'))
+        if limit < 1:
+            limit = None
+    except:
+        limit = None
+
+    skip_ids = session.query(SkipSongs.c.song_id)
+    data = session.query(
+            Chart.song_id,
+            func.count(Chart.song_id).label('week_count')).\
+        filter(Chart.song_id.notin_(skip_ids)).\
+        group_by(Chart.song_id).\
+        order_by(desc('week_count'))[:limit]
+
+    if not data:
+        f.abort(404, description=f"Couldn't get data for the Longest playing songs chart")
+
+    data_lst = []
+    for d in data:
+        data_lst.append({
+            'song_id': d.song_id,
+            'week_count': d.week_count
+        })
+
+    return jsonify(data_lst)
+
+
+# Get data for "The most successful artist/band"
+# Parameter: limit - return only top limit artists
+# [{
+#       'artist_id': d.artist_id,
+#       'name': d.name,
+#       'is_band': d.is_band,
+#       'genre': d.genre,
+#       'total_score': d.total_score
+# }]
+@app.route('/api/v1.0/artistrating')
+def get_artistrating():
+    # SELECT * from ArtistRating
+    #  LIMIT 25; -- can be a parameter
+    try:
+        limit = int(request.args.get('limit'))
+        if limit < 1:
+            limit = None
+    except:
+        limit = None
+
+    session = Session()
+    data = session.query(ArtistRating)[:limit]
+
+    if not data:
+        f.abort(404, description=f"Couldn't get data for the Artist Rating chart")
+
+    data_lst = []
+    for d in data:
+        data_lst.append({
+            'artist_id': d.id,
+            'name': d.name,
+            'is_band': d.is_band,
+            'genre': d.genre,
+            'total_score': d.total_score
+        })
+
+    return jsonify(data_lst)
+
+
+# Get data for "Longest time in the Top 100" chart
+# Parameter: limit - return only top limit artists
+# [{
+#       'artist_id': d.artist_id,
+#       'name': d.name,
+#       'is_band': d.is_band,
+#       'genre': d.genre,
+#       'week_count': d.week_count
+# }]
+@app.route('/api/v1.0/artistweeks')
+def get_artistweeks():
+    # SELECT * from ArtistWeeks
+    #  LIMIT 25; -- can be a parameter
+    try:
+        limit = int(request.args.get('limit'))
+        if limit < 1:
+            limit = None
+    except:
+        limit = None
+
+    session = Session()
+    data = session.query(ArtistWeeks)[:limit]
+
+    if not data:
+        f.abort(404, description=f"Couldn't get data for the 'Longest time in the Top 100' chart")
+
+    data_lst = []
+    for d in data:
+        data_lst.append({
+            'artist_id': d.artist_id,
+            'name': d.name,
+            'is_band': d.is_band,
+            'genre': d.genre,
+            'week_count': d.week_count
+        })
 
     return jsonify(data_lst)
 
