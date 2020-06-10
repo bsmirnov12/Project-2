@@ -8,7 +8,7 @@ import sqlalchemy
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy import create_engine, event, MetaData, Table
+from sqlalchemy import create_engine, event, MetaData, Table, func
 
 #################################################
 # Flask Setup
@@ -53,6 +53,7 @@ Song = AutomapBase.classes.Song
 # Views
 meta = MetaData()
 SongEvolution = Table('SongEvolution', meta, autoload=True, autoload_with=engine)
+SkipSongs = Table('SkipSongs', meta, autoload=True, autoload_with=engine)
 
 #################################################
 # Flask Routes
@@ -129,8 +130,15 @@ def get_atist(artist_id):
 
 # Get data for "Song Evolution" line chart
 # Parameters:
-#   position - only show songs that went up to at least this position (e.g. top 25)
-#   weeks - only return songs that stayed in the chart for at least this number of weeks
+#   top - only show songs that went up to at least this position (e.g. top 25)
+#   minweeks - only return songs that stayed in the chart for at least this number of weeks
+# usage: /api/v1.0/evolution?minweeks=8&top=50
+# [{
+#     "id": 1,
+#     "week": [1], 
+#     "position": [1], 
+#     "score": [100]
+# }]
 @app.route('/api/v1.0/evolution')
 def get_evolution():
     session = Session()
@@ -164,6 +172,49 @@ def get_evolution():
     # End of processing. Save the last song
     if song_id:
         data_lst.append(song_data)
+
+    return jsonify(data_lst)
+
+
+# Get data for the scatter plot
+# [{
+#     "song_id": 1, 
+#     "top_position": 1, 
+#     "week_count": 1
+# }]
+@app.route('/api/v1.0/scatter')
+def get_scatter():
+    session = Session()
+
+    # SELECT song_id,
+    #        count(song_id) AS week_count,
+    #        min(position) AS top_position
+    #   FROM Chart
+    #  WHERE song_id NOT IN (
+    #            SELECT song_id
+    #              FROM SkipSongs
+    #        )
+    #  GROUP BY song_id;
+
+    skip_ids = session.query(SkipSongs.c.song_id)
+    data = session.query(
+            Chart.song_id,
+            func.min(Chart.position).label('top_position'),
+            func.count(Chart.song_id).label('week_count')).\
+        filter(Chart.song_id.notin_(skip_ids)).\
+        group_by(Chart.song_id)
+
+    if not data:
+        f.abort(404, description=f"Couldn't get data for the Scatter plot")
+
+    data_lst = []
+    for d in data:
+        song_dct = {
+            'song_id': d.song_id,
+            'top_position': d.top_position,
+            'week_count': d.week_count
+        }
+        data_lst.append(song_dct)
 
     return jsonify(data_lst)
 
