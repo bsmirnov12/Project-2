@@ -81,44 +81,34 @@ CREATE VIEW SkipSongs AS
 -- All the songs (exluding SkipSongs above)
 -- Their evolution week by week with through week numbering (no dates)
 -- All chart positions, top position, duration
--- CREATE VIEW SongEvolution AS
---     SELECT c.song_id AS id,
---            w.week_number - m.min_number AS week_number,
---            c.position,
---            101 - c.position AS score,
---            m.top_position,
---            m.cnt AS week_count
---       FROM (-- Subquery to calculate song statistics: when, how long, how high
---                SELECT c.song_id AS id,
---                       min(w.week_number) AS min_number, -- the  week when the song got to the chart for the first time
---                       min(c.position) AS top_position,  -- the highest position of the song in the chart
---                       count(c.song_id) AS cnt           -- how many weeks the song stayed in the chart
---                  FROM Chart AS c
---                       JOIN
---                       WeekNumbers AS w ON c.year = w.year AND 
---                                           c.week = w.week
---                 WHERE c.song_id NOT IN (-- exclude songs with incomplete data
---                           SELECT id
---                             FROM SkipSongs
---                       )
---                 GROUP BY c.song_id
---            ) AS m
---            JOIN
---            Chart AS c ON c.song_id = m.id
---            JOIN
---            WeekNumbers AS w ON c.year = w.year AND 
---                                c.week = w.week
---      ORDER BY c.song_id;
 
 -- All the songs (exluding SkipSongs above)
 -- Their evolution week by week with through week numbering (no dates)
+-- CREATE VIEW SongEvolution AS
+--     SELECT song_id,
+--            row_number() OVER (PARTITION BY song_id ORDER BY year, week) AS week_number,
+--            position,
+--            101 - position AS score
+--       FROM Chart as c
+--       WHERE song_id NOT IN (SELECT song_id FROM SkipSongs); 
+
+-- Advanced version. Can be used to with filter by top_position and weeks_count.
 CREATE VIEW SongEvolution AS
-    SELECT song_id,
-           row_number() OVER (PARTITION BY song_id ORDER BY year, week) AS week_number,
-           position,
-           101 - position AS score
-      FROM Chart
-      WHERE song_id NOT IN (SELECT song_id FROM SkipSongs); 
+     SELECT c.song_id,
+          row_number() OVER (PARTITION BY c.song_id ORDER BY c.year, c.week) AS week_number,
+          c.position,
+          101 - c.position AS score,
+          s.top_position,
+          s.week_count
+     FROM Chart AS c
+     JOIN (
+          SELECT song_id, min(position) as top_position, count(song_id) as week_count
+          FROM Chart
+          GROUP BY song_id
+     ) AS s
+     ON c.song_id = s.song_id
+     WHERE c.song_id NOT IN (SELECT song_id FROM SkipSongs); 
+
 
 
 -- The most successful artist (or band) by score
@@ -141,8 +131,7 @@ CREATE VIEW ArtistRating AS
                       JOIN
                       Performed_by AS p ON p.song_id = s.song_id
                 GROUP BY p.artist_id
-           )
-           AS s
+           ) AS s
            JOIN
            Artist AS a ON s.artist_id = a.id
      ORDER BY total_score DESC;
