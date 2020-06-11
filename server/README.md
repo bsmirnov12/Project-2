@@ -160,7 +160,7 @@
 
 ### Song Evolution Chart
 
-* Endpoint: `/api/v1.0/evolution`
+* Endpoint: `/api/v1.0/evolution?years=<comma separated list of years>&above=<int>&below=<int>&more=<int>&less=<int>`
 * Description:
     * The chart shows evolution of each song from when it first entered the chart, until it left
     * The data for each song includes:
@@ -273,27 +273,34 @@
 
 * Endpoint: `/api/v1.0/topsongs?limit=<number of songs>`
 * Description:
-    * Returns a list of songs sorted by score, highest score first
+    * Returns an object with 2 lists: song IDs and corresponding scores, highest score first
     * Score is calculated by song position in Top 100. 1st place - 100 points, 100th place - 1 point.
     * Song rating is a sum of scores for all weeks the song was in Top 100
     * Optional parameter `limit` specifies how many songs to return, e.g. limit=3 returns top 3 songs
     * Detailed song information can be obtained via ['Songs list'](#songs-list) endpoint by supplying the list of song IDs
 * Example: (http://localhost:8000/api/v1.0/topsongs?limit=3)
 ```JSON
-[
-  {
-    "song_id": 4647, 
-    "total_score": 6352
-  }, 
-  {
-    "song_id": 1376, 
-    "total_score": 5796
-  }, 
-  {
-    "song_id": 3583, 
-    "total_score": 5753
-  }
-]
+{
+  "song_id": [4647,1376,3583], 
+  "total_score": [6352,5796,5753]
+}
+```
+* Example of JS to query detailed song information:
+```javascript
+var data = [], song_info = {};
+const query1 = '/api/v1.0/topsongs?limit=10'
+d3.json(query1)
+    .then(response1 => {
+        data = response1;
+        let ids = response1['song_id'].join(',');
+        let query2 = '/api/v1.0/songs?ids=' + ids;
+        return d3.json(query2)
+    })
+    .then(response2 => {
+        response2.forEach(song => { song_info[song.id] = song });
+        // Draw chart with data. Use data['total_score'] for X-axis, data['song_id'] for Y-axis, or the other way around
+        // Add tooltips with song_info, use song_info[song_id] to get the deatils
+    });
 ```
 
 ### Songs: The longest in the Top songs
@@ -305,89 +312,94 @@
     * Detailed song information can be obtained via ['Songs list'](#songs-list) endpoint by supplying the list of song IDs
 * Example: (http://localhost:8000/api/v1.0/weeksintop?limit=3)
 ```JSON
-[
-  {
-    "song_id": 4647, 
-    "week_count": 76
-  }, 
-  {
-    "song_id": 3583, 
-    "week_count": 74
-  }, 
-  {
-    "song_id": 3099, 
-    "week_count": 71
-  }
-]
+{
+  "song_id": [4647,3583,3099], 
+  "week_count": [76,74,71]
+}
+```
+* Example of JS to query detailed song information:
+```javascript
+var data = [], song_info = {};
+const query1 = '/api/v1.0/weeksintop?limit=10'
+d3.json(query1)
+    .then(response1 => {
+        data = response1;
+        let ids = response1['song_id'].join(',');
+        let query2 = '/api/v1.0/songs?ids=' + ids;
+        return d3.json(query2)
+    })
+    .then(response2 => {
+        response2.forEach(song => { song_info[song.id] = song });
+        // Draw chart with data. Use data['week_count'] for X-axis, data['song_id'] for Y-axis, or the other way around
+        // Add tooltips with song_info, use song_info[song_id] to get the deatils
+    });
 ```
 
 ### Artists: The most successful artist/band
 
-* Endpoint: `/api/v1.0/artistrating?limit=<number of artists>`
+* Endpoint: `/api/v1.0/artistrating?limit=<number of artists>&is_band=<0 or 1>`
 * Description:
     * Returns a list of artists/bands sorted by score, highest score first
     * Artist's score is defined by the sum of song scores this artist performed
     * How song scores are calculated is described in ['Most successful songs'](#most-successful-songs)
     * Optional parameter `limit` specifies how many artists to return, e.g. limit=3 returns top 3 artists
+    * Optional parameter `is_band` specifies wether to return a list of artists (0) or bands (1). If omitted return all, including uncategorized performers (no data in DB)
     * Detailed artists information can be obtained via ['Artists list'](#artists-list) endpoint by supplying the list of artist IDs
-* Example: (http://localhost:8000/api/v1.0/artistrating?limit=3)
+* Example: (http://localhost:8000/api/v1.0/artistrating?limit=3&is_band=0)
 ```JSON
-[
-  {
-    "artist_id": 7, 
-    "name": "Drake", 
-    "is_band": 0, 
-    "genre": "Hip hop", 
-    "total_score": 96180
-  }, 
-  {
-    "artist_id": 67, 
-    "name": "Rihanna", 
-    "is_band": 0, 
-    "genre": "R&B", 
-    "total_score": 81742
-  }, 
-  {
-    "artist_id": 120, 
-    "name": "Taylor Swift", 
-    "is_band": 0, 
-    "genre": "Pop", 
-    "total_score": 60251
-  }
-]
+{
+  "artist_id": [7,67,120], 
+  "total_score": [96180,81742,60251]
+}
+```
+* Example of JS to query detailed song information:
+```javascript
+var data = [], artist_info = {};
+const query1 = '/api/v1.0/artistrating?limit=10'
+d3.json(query1)
+    .then(response1 => {
+        data = response1;
+        let ids = response1['artist_id'].join(',');
+        let query2 = '/api/v1.0/artists?ids=' + ids;
+        return d3.json(query2)
+    })
+    .then(response2 => {
+        response2.forEach(artist => { artist_info[artist.id] = artist });
+        // Draw chart with data. Use data['total_score'] for X-axis, data['artist_id'] for Y-axis, or the other way around
+        // Add tooltips with artist_info, use artist_info[artist_id] to get the deatils
+    });
 ```
 
 ### Artist: Longest time in the Top 100
 
-* Endpoint: `/api/v1.0/artistweeks`
+* Endpoint: `/api/v1.0/artistweeks?limit=<number of artists>&is_band=<0 or 1>`
 * Description:
     * Returns a list of artists/bands whos names were in Top 100 the longest time
     * A week is counted towards an artist if his/her/its song (one or more) was in Top 100 that week
     * Optional parameter `limit` specifies how many artists to return, e.g. limit=3 returns top 3 artists
+    * Optional parameter `is_band` specifies wether to return a list of artists (0) or bands (1). If omitted return all, including uncategorized performers (no data in DB)
     * Detailed artists information can be obtained via ['Artists list'](#artists-list) endpoint by supplying the list of artist IDs
-* Example: (http://localhost:8000/api/v1.0/artistweeks?limit=3)
+* Example: (http://localhost:8000/api/v1.0/artistweeks?limit=3&is_band=1)
 ```JSON
-[
-  {
-    "artist_id": 120, 
-    "name": "Taylor Swift", 
-    "is_band": 0, 
-    "genre": "Pop", 
-    "week_count": 546
-  }, 
-  {
-    "artist_id": 7, 
-    "name": "Drake", 
-    "is_band": 0, 
-    "genre": "Hip hop", 
-    "week_count": 531
-  }, 
-  {
-    "artist_id": 67, 
-    "name": "Rihanna", 
-    "is_band": 0, 
-    "genre": "R&B", 
-    "week_count": 492
-  }
-]
+{
+  "artist_id": [24,644,342], 
+  "week_count": [453,425,316]
+}
+```
+* Example of JS to query detailed song information:
+```javascript
+var data = [], artist_info = {};
+const query1 = '/api/v1.0/artistweeks?limit=10'
+d3.json(query1)
+    .then(response1 => {
+        data = response1;
+        let ids = response1['artist_id'].join(',');
+        let query2 = '/api/v1.0/artists?ids=' + ids;
+        return d3.json(query2)
+    })
+    .then(response2 => {
+        response2.forEach(artist => { artist_info[artist.id] = artist });
+        // Draw chart with data. Use data['week_count'] for X-axis, data['artist_id'] for Y-axis, or the other way around
+        // Add tooltips with artist_info, use artist_info[artist_id] to get the deatils
+    });
 ```
