@@ -168,30 +168,34 @@
         * Array of Top 100 chart position for each week
         * Array of scores (101 - chart position) for each week 
     * Array of week numbers is meant for X-axis, array of score - for Y-axis values, array of positions - for Y-axis labels
-* Example (only first 3 songs are shown): (http://localhost:8000/api/v1.0/evolution)
+    * Additional filtering parameters:
+        * years - comma separeted list of years. Include only songs that were in Top 100 during specified years
+        * above - include only songs which position number was <=above (above=50 - top half of Top 100, #1 hits and below to #50)
+        * below - include only songs which position number was >=below (below=50 - bottom half of Top 100, from #50 to #100)
+        * more - include only songs which stayed in Top 100 >=more number of weeks
+        * less - include only songs which stayed in Top 100 <=less number of weeks
+* Example: (http://localhost:8000/api/v1.0/evolution?years=2020&above=5&below=2&more=30&less=40)
 ```JSON
 [
   {
-    "id": 1, 
-    "week": [1], 
-    "position": [1], 
-    "score": [100]
+    "id": 10, 
+    "week": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37], 
+    "position": [5,2,6,6,6,6,5,3,4,4,4,4,5,7,6,6,7,3,5,7,7,9,7,8,9,8,10,8,8,7,9,10,10,7,8,11,10], 
+    "score": [96,99,95,95,95,95,96,98,97,97,97,97,96,94,95,95,94,98,96,94,94,92,94,93,92,93,91,93,93,94,92,91,91,94,93,90,91]
   }, 
   {
-    "id": 2, 
-    "week": [1], 
-    "position": [2], 
-    "score": [99]
+    "id": 20, 
+    "week": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34], 
+    "position": [31,28,17,10,10,10,6,5,3,3,4,2,4,5,2,4,5,5,5,5,6,10,9,11,11,12,14,16,15,15,16,19,23,20], 
+    "score": [70,73,84,91,91,91,95,96,98,98,97,99,97,96,99,97,96,96,96,96,95,91,92,90,90,89,87,85,86,86,85,82,78,81]
   }, 
   {
-    "id": 3, 
-    "week": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24], 
-    "position": [2,9,9,19,12,8,11,9,8,4,5,4,4,4,4,5,1,1,1,1,1,2,1,3], 
-    "score": [99,92,92,82,89,93,90,92,93,97,96,97,97,97,97,96,100,100,100,100,100,99,100,98]
-  },
-  ...
-] 
-```
+    "id": 36, 
+    "week": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32], 
+    "position": [2,8,9,15,12,12,15,14,16,20,20,24,13,13,18,21,20,21,21,22,24,22,26,32,39,36,37,38,26,29,46,36], 
+    "score": [99,93,92,86,89,89,86,87,85,81,81,77,88,88,83,80,81,80,80,79,77,79,75,69,62,65,64,63,75,72,55,65]
+  }
+]```
 
 ### 'Weeks in Top 100 and highest position' scatter plot
 

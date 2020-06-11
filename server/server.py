@@ -8,7 +8,7 @@ import sqlalchemy
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy import create_engine, event, MetaData, Table, func, desc
+from sqlalchemy import create_engine, event, MetaData, Table, func, desc, distinct
 
 #################################################
 # Flask Setup
@@ -62,12 +62,16 @@ ArtistWeeks = Table('ArtistWeeks', meta, autoload=True, autoload_with=engine)
 #################################################
 
 # ---------------------
-# Handle 404 situations
+# Handle 400 situations
 # ---------------------
 
 @app.errorhandler(404)
 def page_not_found(error):
     return jsonify(error=str(error)), 404
+
+@app.errorhandler(400)
+def page_not_found(error):
+    return jsonify(error=str(error)), 400
 
 # -----------------------------------------
 # Static parts: imdex.html, js, css, images
@@ -185,10 +189,13 @@ def get_artists():
     return jsonify(artists_lst)
 
 # Get data for "Song Evolution" line chart
-# Parameters:
-#   top - only show songs that went up to at least this position (e.g. top 25)
-#   minweeks - only return songs that stayed in the chart for at least this number of weeks
-# usage: /api/v1.0/evolution?minweeks=8&top=50
+# Parameters (all can be combined):
+#   years - comma separeted list of years. Include only songs that were in Top 100 during specified years
+#   above - include only songs which position number was <=above (above=50 - top half of Top 100, #1 hits and below to #50)
+#   below - include only songs which position number was >=below (below=50 - bottom half of Top 100, from #50 to #100)
+#   more - include only songs which stayed in Top 100 >=more number of weeks
+#   less - include only songs which stayed in Top 100 <=less number of weeks
+# usage: /api/v1.0/evolution?years=2020,2019&above=25&more=24 - Top 25 hits from 2019 and 2020 that stayed in Top 100 at leas 24 weeks
 # [{
 #     "id": 1,
 #     "week": [1], 
@@ -197,8 +204,35 @@ def get_artists():
 # }]
 @app.route('/api/v1.0/evolution')
 def get_evolution():
+    years, above, below, more, less = None, None, None, None, None
+    try:
+        s = request.args.get('years')
+        if s: years = [int(year) for year in s.split(',')]
+        s = request.args.get('above')
+        if s: above = int(s)
+        s = request.args.get('below')
+        if s: below = int(s)
+        s = request.args.get('more')
+        if s: more = int(s)
+        s = request.args.get('less')
+        if s: less = int(s)
+    except: # no filters
+        f.abort(400, description=f"Incorrect parameters")
+       
     session = Session()
-    data = session.query(SongEvolution).order_by(SongEvolution.c.song_id)
+    data = session.query(SongEvolution) #.order_by(SongEvolution.c.song_id)
+    # Applying additional filters
+    if years:
+        song_ids = session.query(distinct(Chart.song_id)).filter(Chart.year.in_(years))
+        data = data.filter(SongEvolution.c.song_id.in_(song_ids))
+    if above:
+        data = data.filter(SongEvolution.c.top_position <= above)
+    if below:
+        data = data.filter(SongEvolution.c.top_position >= below)
+    if more:
+        data = data.filter(SongEvolution.c.week_count >= more)
+    if less:
+        data = data.filter(SongEvolution.c.week_count <= less)
 
     if not data:
         f.abort(404, description=f"Couldn't get data for 'Song Evolution' chart")
@@ -229,6 +263,7 @@ def get_evolution():
     if song_id:
         data_lst.append(song_data)
 
+    print(len(data_lst))
     return jsonify(data_lst)
 
 
