@@ -1,7 +1,8 @@
 // Revise endpoint for filtering parameters
 
-function buildPlot() {
-    var base_url = "/api/v1.0/evolution?"
+function renderLinechart(year) {
+    var base_url = "/api/v1.0/evolution"
+    console.log(year)
     // -------------------------------------
     // base_endpoint='/api/v1.0/evolution?years=<comma separated list of years>&above=<int>&below=<int>&more=<int>&less=<int></int>'
     // years - comma separeted list of years. Include only songs that were in Top 100 during specified years
@@ -10,15 +11,14 @@ function buildPlot() {
     // more - include only songs which stayed in Top 100 >=more number of weeks
     // less - include only songs which stayed in Top 100 <=less number of weeks
     
-    var years = [2020]
-    var above = 50
-    var below = 0
-    var more = 0
-    var less = 0
-    const query1= `${base_url}years=${years}&above=${above}&below=${below}&more=${more}&less=${less}`
+    // var above = 50
+    // var below = 0
+    // var more = 0
+    // var less = 0
+    // const query1= `${base_url}years=${years}&above=${above}&below=${below}&more=${more}&less=${less}`
+    var query1= `${base_url}?years=${year}`
 
     var data = []
-
     
     // Read api and handle data promise
     d3.json(query1).then(songData => {
@@ -26,10 +26,14 @@ function buildPlot() {
         songData.forEach(song => {
 
             var trace = {
-                // hovertemplate: hoverTemplate(),
-                text:  song['position'],
+                hovertemplate: '%{meta.name}<br>By: %{meta.performer}<br>Week: %{x}<br>Position: %{y}',
                 x: song['week'],
-                y: song['score'],
+                y: song['position'],
+                meta: {
+                    id: song['id'],
+                    name: song['name'],
+                    performer: song['performer']
+                },
                 mode: 'lines',
                 type:'scatter',
                 line:{
@@ -38,53 +42,52 @@ function buildPlot() {
                 opacity:0.5
             }
 
-        data.push(trace);
-
+            data.push(trace);
         });
-        var myPlot = document.getElementById('line'),
+
         // define layout object
-        layout = {
+        var  layout = {
             hovermode: 'closest',
             showlegend: false,
-            title: `Life cycle of a song on Top 100 Chart (${years[0]}-${years[years.length-1]})`,
+            title: `Life cycle of a song on Top 100 Chart for year ${year}`,
             xaxis:{
                 title: "Weeks on Chart",
                 showgrid: false,
                 tickmode: 'linear',
-                ticks: 'inside',
+                ticks: 'outside',
+                position: 0.05,
                 tick0: 0,
                 dtick: 10,
                 ticklen: 7,
-                tickwidth: 2
+                tickwidth: 2,
+                showline: true
                 },
             yaxis: {
-                title: "Rank in Chart",
+                title: "Position in Chart",
                 showgrid: false,
-                tickmode:"linear",
+                tickmode:"array",
+                tickvals: [1, 25, 50, 75, 100],
+                autorange: 'reversed',
+                zeroline: false,
+                // tickmode:"linear",
+                // tick0: 25,
+                // dtick: 25,
                 ticks: 'outside',
-                tick0: 25,
-                dtick: 25,
                 ticklen: 7,
                 tickwidth: 2
             }
             
         };
         
-        Plotly.newPlot('line', data, layout);
+        Plotly.react('line', data, layout);
         });
 }
 
-buildPlot();
-var LinePlot = document.getElementById('line');
+renderLinechart(2020);
 
-
+var LinePlot = d3.select('#line');
 
 LinePlot.on('plotly_hover', function(data){
-
-  
     var update = {'opacity':1};
     Plotly.restyle('line', update, [tn]);
   });
-
-
-  

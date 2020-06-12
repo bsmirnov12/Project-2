@@ -8,7 +8,7 @@ import sqlalchemy
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy import create_engine, event, MetaData, Table, func, desc, distinct
+from sqlalchemy import create_engine, event, MetaData, Table, func, desc, distinct, join
 
 import sys
 
@@ -247,7 +247,9 @@ def get_evolution():
         f.abort(400, description=f"Malformed request")
        
     session = Session()
-    data = session.query(SongEvolution)
+    data = session.query(SongEvolution, Song.song_name, Song.performed_by).\
+            join(Song, Song.id == SongEvolution.c.song_id)
+            
     # Applying additional filters
     if years:
         song_ids = session.query(distinct(Chart.song_id)).filter(Chart.year.in_(years))
@@ -260,6 +262,8 @@ def get_evolution():
         data = data.filter(SongEvolution.c.week_count >= more)
     if less:
         data = data.filter(SongEvolution.c.week_count <= less)
+
+
 
     if not data:
         f.abort(404, description=f"Couldn't get data for 'Song Evolution' chart")
@@ -277,6 +281,8 @@ def get_evolution():
             song_id = d.song_id
             song_data = {
                 'id': d.song_id,
+                'name': d.song_name,
+                'performer': d.performed_by,
                 'week': [d.week_number],
                 'position': [d.position],
                 'score': [d.score]
