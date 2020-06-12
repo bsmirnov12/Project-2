@@ -63,17 +63,18 @@
             console.log(data['artist_id'].map(artist_id => artist_info[artist_id]))
 
             var data2 = [{
+                hovertemplate: `<br>By: {meta.artist_id}<br>Rank: {x}<br>Performer: %{y}`,
                 x: data['total_score'].reverse(),
                 y: data['artist_id'].map(artist_id => artist_info[artist_id]['name']).reverse(),
                 type: 'bar',
+                marker: {
+                    color: 'lightblue'},
                 orientation: 'h'
             }]
             var layout = {
                 title:'Top 10 Artists',
                 xaxis: { title: "Rating"},
                 yaxis: {title: "Artist",tickangle: -45},
-                marker: {
-                    color: 'lightblue'},
                 hovermode:'closest',
                 barmode: 'group'
             };
