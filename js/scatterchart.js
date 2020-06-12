@@ -18,8 +18,8 @@
     var myPlot = document.getElementById('scatter'),
         hoverInfo = document.getElementById('hoverinfo'),
         data = [{
-            x: highestPosition,
-            y: weeksInChart,
+            x: weeksInChart,
+            y: highestPosition,
             type: 'scatter',
             text:songId,
             mode: 'markers'}];
