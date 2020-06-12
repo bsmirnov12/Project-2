@@ -22,7 +22,7 @@ app.config['JSON_SORT_KEYS'] = False
 #################################################
 
 # Create engine to access the database
-engine = create_engine("sqlite:///../data/CanadaTop100.sqlite")
+engine = create_engine("sqlite:///../data/CanadaTop100v2.sqlite")
 
 # Turn on PRAGMA foreign_keys to enforce foregn key constraints (it is disabled by default in SQLite)
 @event.listens_for(Engine, "connect")

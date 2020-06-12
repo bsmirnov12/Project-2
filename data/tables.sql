@@ -18,12 +18,12 @@ CREATE TABLE "Song" (
     -- id - synthetic key used for referencing
     "id" INTEGER PRIMARY KEY,
     -- First part of the UNIQUE constraint
-    "song_name" TEXT NOT NULL ,
+    "song_name" TEXT COLLATE NOCASE NOT NULL,
     -- Second part of the UNIQUE constraint
     -- It is a string as visible on the web page.
     -- However, for collaborations it actually consistes of several parts - each for one performer, which is visible during scraping.
     -- Later each performer is saved separately and its order in the list is saved too.
-    "performed_by" TEXT NOT NULL,
+    "performed_by" TEXT COLLATE NOCASE NOT NULL,
     CONSTRAINT "uniq_Song" UNIQUE (
         "song_name", "performed_by"
     )
@@ -31,7 +31,7 @@ CREATE TABLE "Song" (
 
 GO
 
-CREATE UNIQUE INDEX "idx_Song" on "Song" ( "song_name", "performed_by" )
+CREATE UNIQUE INDEX "idx_Song" on "Song" ("song_name", "performed_by")
 
 GO
 
@@ -61,13 +61,13 @@ GO
 -- Probably will have to make special admin page to help fill some info by hand
 CREATE TABLE "Artist" (
     "id" INTEGER PRIMARY KEY,
-    "name" TEXT NOT NULL UNIQUE,
+    "name" TEXT COLLATE NOCASE NOT NULL UNIQUE,
     "is_band" INT NULL,
-    "genre" TEXT NULL,
+    "genre" TEXT COLLATE NOCASE NULL,
     "image" TEXT NULL,
     "wiki" TEXT NULL,
     "dob" TEXT NULL,
-    "origin" TEXT NULL
+    "origin" TEXT COLLATE NOCASE NULL
 )
 
 GO
@@ -76,7 +76,7 @@ CREATE UNIQUE INDEX "idx_Artist_Name" on "Artist" ("name")
 
 GO
 
-CREATE INDEX "idx_Artist_Genre" on "Artist" ( "genre" )
+CREATE INDEX "idx_Artist_Genre" on "Artist" ("genre")
 
 GO
 
