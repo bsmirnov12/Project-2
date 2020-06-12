@@ -40,7 +40,7 @@ function buildPlot() {
         data.push(trace);
 
         });
-        var myPlot = document.getElementById('myDiv'),
+        // var myPlot = document.getElementById('line'),
         // define layout object
         layout = {
             hovermode: 'closest',
@@ -77,18 +77,19 @@ buildPlot();
 
 
 
-myPlot.on('plotly_hover', d3.json(query2 +).then(
-    songData => 
-    var pn='',
-        tn='',
-        colors=[];
-    for(var i=0; i < data.points.length; i++){
-      pn = data.points[i].pointNumber;
-      tn = data.points[i].curveNumber;
-      colors = data.points[i].data.marker.color;
-    };
-    colors[pn] = '#C54C82';
+// myPlot.on('plotly_hover', function(data){
+//     var xv='',
+//     yv='',
+//     colors=[];
+
+   
+    
+//     for (var i=0; i < data.id.length; i++){
+//       pn = data[i].id[i];
+//       tn = data[i].id[i];
+      
+//     };
   
-    var update = {'marker':{color: colors, size:16}};
-    Plotly.restyle('myDiv', update, [tn]);
-  });
+//     var update = {'opacity':1};
+//     Plotly.restyle('line', update, [tn]);
+//   });
