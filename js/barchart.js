@@ -1,5 +1,45 @@
 // define button for form
+function init() {
+    
+    // console.log(input)
+    var data = [], artist_info = {};
+    const query1 = `/api/v1.0/artistrating?limit=10&is_band=0`
+    d3.json(query1)
+        .then(response1 => {
+            data = response1;
+            let ids = response1['artist_id'].join(',');
+            let query2 = '/api/v1.0/artists?ids=' + ids;
+            
+            return d3.json(query2)
+            
+        })
+        .then(response2 => {
+            response2.forEach(artist => { artist_info[artist.id] = artist });
+            // Draw chart with data. Use data['total_score'] for X-axis, data['artist_id'] for Y-axis, or the other way around
+            // Add tooltips with artist_info, use artist_info[artist_id] to get the deatils
+            // console.log(data['artist_id'].map(artist_id => artist_info[artist_id]))
 
+            var data2 = [{
+                hovertemplate: `$Artist: %{y} <br>Rating: %{x}`,
+                x: data['total_score'].reverse(),
+                y: data['artist_id'].map(artist_id => artist_info[artist_id]['name']).reverse(),
+                type: 'bar',
+                marker: {
+                    color: 'lightblue'},
+                orientation: 'h'
+            }]
+            var layout = {
+                title:'Top 10 Artists',
+                xaxis: { title: "Rating"},
+                yaxis: {title: "Artist",tickangle: -45},
+                hovermode:'closest',
+                barmode: 'group',
+                margin: 200
+            };
+          
+            Plotly.newPlot('Artist_bar', data2, layout);
+        });
+    }
 
 function handleInput() {
     // Prevent the page from refreshing
@@ -60,5 +100,5 @@ function renderBarchart(selected) {
             Plotly.newPlot('Artist_bar', data2, layout);
         });
     }
-
+init();
 d3.select("#artistInput").on("change", handleInput);
