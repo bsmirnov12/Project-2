@@ -403,10 +403,10 @@ def get_weekstophist():
 
 # Get data for "The most successful songs" chart
 # Parameter: limit - return only top limit songs
-# [{
-#       'song_id': d.song_id,
-#       'total_score': d.total_score
-# }]
+# {
+#       'song_id': [d.song_id],
+#       'total_score': [d.total_score]
+# }
 @app.route('/api/v1.0/topsongs')
 def get_topsongs():
     session = Session()
@@ -438,22 +438,24 @@ def get_topsongs():
     if not data:
         f.abort(404, description=f"Couldn't get data for the Top Songs chart")
 
-    data_lst = []
+    song_lst = []
+    score_lst = []
     for d in data:
-        data_lst.append({
-            'song_id': d.song_id,
-            'total_score': d.total_score
-        })
+        song_lst.append(d.song_id)
+        score_lst.append(d.total_score)
 
-    return jsonify(data_lst)
+    return jsonify({
+        'song_id': song_lst,
+        'total_score': score_lst
+    })
 
 
 # Get data for "The longest playing songs"
 # Parameter: limit - return only top limit songs
-# [{
-#       'song_id': d.song_id,
-#       'weeks_count': d.week_count
-# }]
+# {
+#       'song_id': [d.song_id],
+#       'weeks_count': [d.week_count]
+# }
 @app.route('/api/v1.0/weeksintop')
 def get_weeksintop():
     session = Session()
@@ -481,92 +483,116 @@ def get_weeksintop():
     if not data:
         f.abort(404, description=f"Couldn't get data for the Longest playing songs chart")
 
-    data_lst = []
+    song_lst = []
+    week_lst = []
     for d in data:
-        data_lst.append({
-            'song_id': d.song_id,
-            'week_count': d.week_count
-        })
+        song_lst.append(d.song_id)
+        week_lst.append(d.week_count)
 
-    return jsonify(data_lst)
+    return jsonify({
+        'song_id': song_lst,
+        'week_count': week_lst
+    })
 
 
 # Get data for "The most successful artist/band"
-# Parameter: limit - return only top limit artists
-# [{
-#       'artist_id': d.artist_id,
-#       'name': d.name,
-#       'is_band': d.is_band,
-#       'genre': d.genre,
-#       'total_score': d.total_score
-# }]
+# Parameter:
+#   limit - return only top limit artists
+#   is_band - 0 for artists, 1 for bands. Optional parameter, if omitted return all types, including unrecognized (None)
+# {
+#       'artist_id': [d.artist_id]
+#       'total_score': [d.total_score]
+# }
 @app.route('/api/v1.0/artistrating')
 def get_artistrating():
     # SELECT * from ArtistRating
+    #  WHERE is_band = <is_band>
     #  LIMIT 25; -- can be a parameter
     try:
-        limit = int(request.args.get('limit'))
-        if limit < 1:
+        s = request.args.get('limit')
+        if s:
+            limit = int(s)
+            if limit < 1:
+                raise f"limit='{s}'"
+        else:
             limit = None
-    except:
-        limit = None
+
+        s = request.args.get('is_band')
+        if s:
+            is_band = int(s)
+            if not is_band in [0, 1]:
+                raise f"is_band='{s}'"
+        else:
+            is_band = None
+    except e:
+        f.abort(400, description="Incorrect parameter: {0}".format(e))
 
     session = Session()
-    data = session.query(ArtistRating)[:limit]
+    data = session.query(ArtistRating)
+    if is_band is not None:
+        data = data.filter_by(is_band = is_band)
+    data = data[:limit]
 
-    if not data:
-        f.abort(404, description=f"Couldn't get data for the Artist Rating chart")
-
-    data_lst = []
+    artist_lst = []
+    score_lst = []
     for d in data:
-        data_lst.append({
-            'artist_id': d.id,
-            'name': d.name,
-            'is_band': d.is_band,
-            'genre': d.genre,
-            'total_score': d.total_score
-        })
+        artist_lst.append(d.id)
+        score_lst.append(d.total_score)
 
-    return jsonify(data_lst)
+    return jsonify({
+        'artist_id': artist_lst,
+        'total_score': score_lst
+    })
 
 
 # Get data for "Longest time in the Top 100" chart
-# Parameter: limit - return only top limit artists
-# [{
-#       'artist_id': d.artist_id,
-#       'name': d.name,
-#       'is_band': d.is_band,
-#       'genre': d.genre,
-#       'week_count': d.week_count
-# }]
+# Parameter:
+#   limit - return only top limit artists
+#   is_band - 0 for artists, 1 for bands. Optional parameter, if omitted return all types, including unrecognized (None)
+# {
+#       'artist_id': [d.artist_id]
+#       'total_score': [d.total_score]
+# }
 @app.route('/api/v1.0/artistweeks')
 def get_artistweeks():
     # SELECT * from ArtistWeeks
+    #  WHERE is_band = <is_band>
     #  LIMIT 25; -- can be a parameter
     try:
-        limit = int(request.args.get('limit'))
-        if limit < 1:
+        s = request.args.get('limit')
+        if s:
+            limit = int(s)
+            if limit < 1:
+                raise f"limit='{s}'"
+        else:
             limit = None
-    except:
-        limit = None
+
+        s = request.args.get('is_band')
+        if s:
+            is_band = int(s)
+            if not is_band in [0, 1]:
+                raise f"is_band='{s}'"
+        else:
+            is_band = None
+    except e:
+        f.abort(400, description="Incorrect parameter: {0}".format(e))
 
     session = Session()
-    data = session.query(ArtistWeeks)[:limit]
+    data = session.query(ArtistWeeks)
+    if is_band is not None:
+        data = data.filter_by(is_band = is_band)
+    data = data[:limit]
 
-    if not data:
-        f.abort(404, description=f"Couldn't get data for the 'Longest time in the Top 100' chart")
-
-    data_lst = []
+    artist_lst = []
+    week_lst = []
     for d in data:
-        data_lst.append({
-            'artist_id': d.artist_id,
-            'name': d.name,
-            'is_band': d.is_band,
-            'genre': d.genre,
-            'week_count': d.week_count
-        })
+        artist_lst.append(d.artist_id)
+        week_lst.append(d.week_count)
 
-    return jsonify(data_lst)
+    return jsonify({
+        'artist_id': artist_lst,
+        'week_count': week_lst
+    })
 
 
 # Starting the server
