@@ -22,6 +22,8 @@
             y: highestPosition,
             type: 'scatter',
             text:songId,
+            marker: {
+                color: 'lightblue'},
             mode: 'markers'}];
         layout = {
             title:'Weeks on chart vs. Highest Ranking',
