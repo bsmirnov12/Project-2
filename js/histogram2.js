@@ -5,15 +5,11 @@ d3.json("/api/v1.0/tophist").then(songData => {
     
 
     console.log(songData);
-    var ending_value = Math.max(songData);
-    var starting_value = Math.min(songData);
-    console.log(ending_value);
-    console.log(starting_value);
 
     var trace = {
         histfunc: 'count',
         x: songData,
-        xbins: {'end':ending_value, 'size':10, 'start': starting_value},
+        xbins: {'end': 100, 'size':10, 'start': 1},
         type: 'histogram'
     };
 
