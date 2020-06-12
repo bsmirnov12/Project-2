@@ -54,6 +54,7 @@ Song = AutomapBase.classes.Song
 
 # Views
 meta = MetaData()
+LastWeeks = Table('LastWeeks', meta, autoload=True, autoload_with=engine)
 SongEvolution = Table('SongEvolution', meta, autoload=True, autoload_with=engine)
 SkipSongs = Table('SkipSongs', meta, autoload=True, autoload_with=engine)
 ArtistRating = Table('ArtistRating', meta, autoload=True, autoload_with=engine)
@@ -98,6 +99,30 @@ def send_image(fname):
 # -------------------------
 # Dynamic parts: DB queries
 # -------------------------
+
+# Query a list of last weeks for each year
+# Why: most years have 52 weeks, but some - 53, and current year's last week is the week of last publication of Top 100
+# Returns
+# [{ year: 2007, week: 52},
+#  { year: 2008, week: 52},
+#  ...
+# }]
+@app.route('/api/v1.0/lastweeks')
+def get_lastweeks():
+    session = Session()
+    data = session.query(LastWeeks).all()
+
+    weeks = []
+    if data:
+        for d in data:
+            weeks.append({
+                'year': d.year,
+                'week': d.week
+            })
+    else:
+        f.abort(404, description=f"Faled to retrieve data ftom the database")
+
+    return jsonify(weeks)
 
 # Query arbitrary song
 @app.route('/api/v1.0/song/<int:song_id>')
