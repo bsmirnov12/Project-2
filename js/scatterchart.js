@@ -41,4 +41,4 @@
 //     .on('plotly_unhover', function(data){
 //         hoverInfo.innerHTML = '';
 //     });
-// });
+});
