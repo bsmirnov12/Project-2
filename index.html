@@ -21,7 +21,7 @@
 
       <!-- Importing style.css and navbar.js with user defined styling and functionality-->
       <link rel="stylesheet" href="css/style.css">
-      <script src="js/navbar.js"></script>
+      <!--script src="js/navbar.js"></script-->
 
       <!-- Importing Font Awesome library for styling -->
       <script src="https://kit.fontawesome.com/4b4a7a09a4.js" crossorigin="anonymous"></script>
@@ -31,9 +31,9 @@
       <!-- Simple dashboard grid layout -->
       <!-- Top Navbar/ Header-->
       <div class="grid-container">
-        <div class="menu-icon">
+        <!--div class="menu-icon">
           <i class="fas fa-bars header__menu"></i>
-        </div>
+        </div-->
         <header class="header">
           <div class="header__heading">
             <span style="font-size: 35px">
@@ -44,7 +44,7 @@
         </header>
 
         <!-- Sidebar-->
-        <aside class="sidenav">
+        <!--aside class="sidenav">
           <div class="sidenav__close-icon">
             <i class="fas fa-times sidenav__brand-close"></i>
           </div>
@@ -69,11 +69,11 @@
                By Artist
             </li>
           </ul>
-        </aside>
+        </aside-->
 
         <!-- Main Content of the Page-->
         <main class="main">
-          <div class="main-overview">
+          <!--div class="main-overview">
             <div class="overviewcard">
               <div class="overviewcard__icon">Current Week</div>
               <div class="overviewcard__info">Card</div>
@@ -86,25 +86,31 @@
               <div class="overviewcard__icon">Most Popular Artist</div>
               <div class="overviewcard__info">Card</div>
             </div>
-          </div>
+          </div-->
           
-            <div class="main-cards">
-              <div class="card">
-                <div id="line"></div>
-              </div>
-              <div class="card">
-                <div id="histogram1"></div>
-              </div>
-              <div class="card">
-                <div id="histogram2"></div>
-              </div>
-              <div class="card">
-                <div id="scatter"></div>
-              </div>
-              <div class="card">
-                <div id="bar"></div>
-              </div>
+          <div class="main-cards">
+            <div class="card">
+              <form>
+                  <div class="form-group">
+                      <select id="years" class="form-control">
+                      </select>
+                  </div>
+              </form>
+              <div id="line"></div>
             </div>
+            <div class="card">
+              <div id="histogram1"></div>
+            </div>
+            <div class="card">
+              <div id="histogram2"></div>
+            </div>
+            <div class="card">
+              <div id="scatter"></div>
+            </div>
+            <div class="card">
+              <div id="Artist_bar"></div>
+            </div>
+          </div>
 
         </main>
 
