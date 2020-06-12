@@ -7,6 +7,7 @@
     * [Songs list](#songs-list)
     * [Artist Information](#artist-information)
     * [Artists list](#artists-list)
+    * [List of last week numbers for each year](#list-of-last-week-numbers-for-each-year)
 * [Chart data endpoints](#chart-data-endpoints)
     * [Song Evolution Chart](#song-evolution-chart)
     * ['Weeks in Top 100 and highest position' scatter plot](#weeks-in-top-100-and-highest-position-scatter-plot)
@@ -153,6 +154,23 @@
     "is_band": 1, 
     "dob": null
   }
+]
+```
+
+### List of last week numbers for each year
+
+* Endpoint: `/api/v1.0/lastweeks`
+* Description: 
+    * returns an array of last weeks numbers for each year
+    * most years have 52 weeks in them, but some - 53, and current year's last week is the week of last publication of Top 100
+* Example: (http://localhost:8000/api/v1.0/lastweeks)
+```JSON
+[
+  {
+    "year": 2007, 
+    "week": 52
+  }, 
+...
 ]
 ```
 

@@ -9,8 +9,8 @@ body {
 /* Assign grid instructions to our parent grid container */
 .grid-container {
     display: grid;
-    grid-template-columns: 1fr; /* Side nav is hidden on mobile */
-    grid-template-rows: 50px 1fr 50px;
+    /*grid-template-columns: 1fr; /* Side nav is hidden on mobile */
+    /*grid-template-rows: 50px 1fr 50px;*/
     grid-template-areas:
       'header'
       'main'
@@ -70,11 +70,13 @@ body {
     transform: translateX(-245px);
     transition: all .6s ease-in-out;
   }
+  
 
   /* The active class is toggled on hamburger and close icon clicks */
   .sidenav.active {
     transform: translateX(0);
   }
+
 
   /* Only visible on mobile screens */
   .sidenav__close-icon {
@@ -103,7 +105,7 @@ body {
     background-color: rgba(255, 255, 255, 0.2);
     cursor: pointer;
   }
-  
+  */
   .main {
     grid-area: main;
   }
@@ -155,7 +157,8 @@ body {
     /* box-sizing: border-box; */
   }
 
-  /* Force varying heights to simulate dynamic content
+  /* Force varying heights to simulate dynamic content */
+  /*
   .card:first-child {
     height: 485px;
   }
@@ -166,7 +169,8 @@ body {
 
   .card:nth-child(3) {
     height: 265px;
-  } */
+  }
+  */
 
   .footer {
     grid-area: footer;
@@ -181,11 +185,17 @@ body {
   @media only screen and (min-width: 46.875em) {
     /* Show the sidenav */
     .grid-container {
-      grid-template-columns: 175px 1fr; /* Show the side nav for non-mobile screens */
+      /*grid-template-columns: 200px 1fr; /* Show the side nav for non-mobile screens */
+      grid-template-columns: 1fr;
       grid-template-areas:
+      /*
         "sidenav header"
         "sidenav main"
         "sidenav footer";
+      */
+        "header"
+        "main"
+        "footer";
     }
 
     .sidenav {

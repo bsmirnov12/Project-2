@@ -10,6 +10,8 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine, event, MetaData, Table, func, desc, distinct
 
+import sys
+
 #################################################
 # Flask Setup
 #################################################
@@ -22,7 +24,7 @@ app.config['JSON_SORT_KEYS'] = False
 #################################################
 
 # Create engine to access the database
-engine = create_engine("sqlite:///../data/CanadaTop100.sqlite")
+engine = create_engine("sqlite:///../data/CanadaTop100v2.sqlite")
 
 # Turn on PRAGMA foreign_keys to enforce foregn key constraints (it is disabled by default in SQLite)
 @event.listens_for(Engine, "connect")
@@ -52,6 +54,7 @@ Song = AutomapBase.classes.Song
 
 # Views
 meta = MetaData()
+LastWeeks = Table('LastWeeks', meta, autoload=True, autoload_with=engine)
 SongEvolution = Table('SongEvolution', meta, autoload=True, autoload_with=engine)
 SkipSongs = Table('SkipSongs', meta, autoload=True, autoload_with=engine)
 ArtistRating = Table('ArtistRating', meta, autoload=True, autoload_with=engine)
@@ -62,7 +65,7 @@ ArtistWeeks = Table('ArtistWeeks', meta, autoload=True, autoload_with=engine)
 #################################################
 
 # ---------------------
-# Handle 400 situations
+# Handle 40x situations
 # ---------------------
 
 @app.errorhandler(404)
@@ -70,7 +73,7 @@ def page_not_found(error):
     return jsonify(error=str(error)), 404
 
 @app.errorhandler(400)
-def page_not_found(error):
+def page_not_found2(error):
     return jsonify(error=str(error)), 400
 
 # -----------------------------------------
@@ -96,6 +99,30 @@ def send_image(fname):
 # -------------------------
 # Dynamic parts: DB queries
 # -------------------------
+
+# Query a list of last weeks for each year
+# Why: most years have 52 weeks, but some - 53, and current year's last week is the week of last publication of Top 100
+# Returns
+# [{ year: 2007, week: 52},
+#  { year: 2008, week: 52},
+#  ...
+# }]
+@app.route('/api/v1.0/lastweeks')
+def get_lastweeks():
+    session = Session()
+    data = session.query(LastWeeks).all()
+
+    weeks = []
+    if data:
+        for d in data:
+            weeks.append({
+                'year': d.year,
+                'week': d.week
+            })
+    else:
+        f.abort(404, description=f"Faled to retrieve data ftom the database")
+
+    return jsonify(weeks)
 
 # Query arbitrary song
 @app.route('/api/v1.0/song/<int:song_id>')
@@ -129,7 +156,7 @@ def get_songs():
         ids_str = request.args.get('ids')
         ids = [int(id) for id in ids_str.split(',')]
     except:
-        ids = []
+        f.abort(400, description=f"Malformed request: {ids_str}")
 
     session = Session()
     songs = session.query(Song).filter(Song.id.in_(ids)).all()
@@ -175,7 +202,7 @@ def get_artists():
         ids_str = request.args.get('ids')
         ids = [int(id) for id in ids_str.split(',')]
     except:
-        ids = []
+        f.abort(400, description=f"Malformed request: {ids_str}")
 
     session = Session()
     artists = session.query(Artist).filter(Artist.id.in_(ids)).all()
@@ -217,10 +244,10 @@ def get_evolution():
         s = request.args.get('less')
         if s: less = int(s)
     except: # no filters
-        f.abort(400, description=f"Incorrect parameters")
+        f.abort(400, description=f"Malformed request")
        
     session = Session()
-    data = session.query(SongEvolution) #.order_by(SongEvolution.c.song_id)
+    data = session.query(SongEvolution)
     # Applying additional filters
     if years:
         song_ids = session.query(distinct(Chart.song_id)).filter(Chart.year.in_(years))
@@ -244,7 +271,7 @@ def get_evolution():
     for d in data:
         if d.song_id != song_id: # new song encountered
             # 1. save previous song
-            if song_id != 0:
+            if song_id:
                 data_lst.append(song_data)
             # 2. start collecting data for new song
             song_id = d.song_id
@@ -263,7 +290,6 @@ def get_evolution():
     if song_id:
         data_lst.append(song_data)
 
-    print(len(data_lst))
     return jsonify(data_lst)
 
 
@@ -524,8 +550,8 @@ def get_artistrating():
                 raise f"is_band='{s}'"
         else:
             is_band = None
-    except e:
-        f.abort(400, description="Incorrect parameter: {0}".format(e))
+    except:
+        f.abort(400, description="Incorrect parameter: {0}".format(sys.exc_info()[1]))
 
     session = Session()
     data = session.query(ArtistRating)
@@ -574,8 +600,8 @@ def get_artistweeks():
                 raise f"is_band='{s}'"
         else:
             is_band = None
-    except e:
-        f.abort(400, description="Incorrect parameter: {0}".format(e))
+    except:
+        f.abort(400, description="Incorrect parameter: {0}".format(sys.exc_info()[1]))
 
     session = Session()
     data = session.query(ArtistWeeks)
