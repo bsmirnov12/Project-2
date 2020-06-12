@@ -13,7 +13,7 @@ d3.json("/api/v1.0/tophist").then(songData => {
     var trace = {
         histfunc: 'count',
         x: songData,
-        xbins: {'end':ending_value, 'size':9, 'start': starting_value},
+        xbins: {'end':ending_value, 'size':10, 'start': starting_value},
         type: 'histogram'
     };
 
