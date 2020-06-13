@@ -3,19 +3,22 @@
  //Read api
  d3.json("/api/v1.0/weekshist").then(songData => {
     
+    // Visibility control
+    let weeksHistogram = d3.select('#histogram1');
+    weeksHistogram.style('visibility', 'hidden');
 
-    console.log(songData);
+    //console.log(songData);
     var ending_value = Math.max(songData);
-    console.log(ending_value);
+    //console.log(ending_value);
 
-    var trace = {
+    var data = [{
         histfunc: 'count',
         x: songData,
         xbins: {'end':ending_value, 'size':5, 'start': 1},
         type: 'histogram',
         marker: {
             color: 'lightblue'}
-    };
+    }];
 
     var layout = {
         title: "Distribution of Songs by Weeks they were in Top 100",
@@ -30,8 +33,10 @@
         }
     };
 
-    var data = [trace]
-
-      
     Plotly.newPlot('histogram1', data, layout);
-    });
+
+    // Rendering complete. Hide wait indicator, show the chart
+    var weeksWaiter = d3.select('#weeks-waiter');
+    weeksWaiter.style('display', 'none');
+    weeksHistogram.style('visibility', 'visible');
+});

@@ -1,3 +1,11 @@
+// Associated elements.
+// Make it global, because they are frequently used
+var artistChart = d3.select('#Artist_bar');
+var artistWaiter = d3.select('#artist-waiter');
+var artistCard = d3.selectAll('.artist-card');
+artistCard.style('visibility', 'hidden');
+
+
 // define button for form
 function init() {
     
@@ -31,13 +39,18 @@ function init() {
             var layout = {
                 title:'Top 10 Artists',
                 xaxis: { title: "Rating"},
-                yaxis: {title: "Artist",tickangle: -45},
+                yaxis: {title: "Artist", tickangle: -45},
                 hovermode:'closest',
                 barmode: 'group',
                 margin: 200
             };
           
             Plotly.newPlot('Artist_bar', data2, layout);
+
+            // Rendering complete. Hide wait indicator, show the chart
+            artistWaiter.style('visibility', 'hidden');
+            artistChart.style('visibility', 'visible');
+            artistCard.style('visibility', 'visible');
         });
     }
 
@@ -54,9 +67,12 @@ function handleInput() {
 
 
 function renderBarchart(selected) {
+    // Hide the chart and show "Rendering..." instead
+    artistChart.style('visibility', 'hidden');
+    artistWaiter.style('visibility', 'visible');
     
     // based on selected value change input for dynamic query
-    if (selected== 'Artist'){
+    if (selected== 'Artists'){
         input=0
     }
     else{
@@ -98,7 +114,13 @@ function renderBarchart(selected) {
             };
           
             Plotly.newPlot('Artist_bar', data2, layout);
+
+            // Rendering complete. Hide wait indicator, show the chart
+            artistWaiter.style('visibility', 'hidden');
+            artistChart.style('visibility', 'visible');
+            // artistCard.style('visibility', 'visible');
         });
     }
+
 init();
 d3.select("#artistInput").on("change", handleInput);

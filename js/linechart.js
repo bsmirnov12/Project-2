@@ -1,8 +1,18 @@
+// Associated elements.
+// Make it global, because they are frequently used
+var lineChart = d3.select('#line');
+var lineWaiter = d3.select('#line-waiter');
+var lineCard = d3.selectAll('.line-card');
+lineCard.style('visibility', 'hidden');
+
 // Revise endpoint for filtering parameters
 
-function renderLinechart(year) {
+function renderLineChart(year) {
+    // Hide the chart and show "Rendering..." instead
+    lineChart.style('visibility', 'hidden');
+    lineWaiter.style('visibility', 'visible');
+
     var base_url = "/api/v1.0/evolution"
-    console.log(year)
     // -------------------------------------
     // base_endpoint='/api/v1.0/evolution?years=<comma separated list of years>&above=<int>&below=<int>&more=<int>&less=<int></int>'
     // years - comma separeted list of years. Include only songs that were in Top 100 during specified years
@@ -23,9 +33,13 @@ function renderLinechart(year) {
     // Read api and handle data promise
     d3.json(query1).then(songData => {
 
-        songData.forEach(song => {
+        let maxWeeks = d3.max(songData, d => d['week'].length);
+        let coloriser = chroma.scale(['navy', 'yellow']).mode('hsl').domain([1, maxWeeks]);
 
-            var trace = {
+        songData.forEach(song => {
+            let color = coloriser(song['week'].length).css();
+
+            let trace = {
                 hovertemplate: '%{meta.name}<br>By: %{meta.performer}<br>Week: %{x}<br>Position: %{y}',
                 x: song['week'],
                 y: song['position'],
@@ -37,7 +51,8 @@ function renderLinechart(year) {
                 mode: 'lines',
                 type:'scatter',
                 line:{
-                    width:1
+                    width:1,
+                    color: color
                 },
                 opacity:0.5
             }
@@ -80,14 +95,42 @@ function renderLinechart(year) {
         };
         
         Plotly.react('line', data, layout);
-        });
+
+        // Rendering complete. Hide wait indicator, show the chart
+        lineWaiter.style('visibility', 'hidden');
+        lineChart.style('visibility', 'visible');
+        lineCard.style('visibility', 'visible');
+    });
 }
 
-renderLinechart(2020);
+function initLineChart() {
+    // Initializing the Select element and the Line Chart
+    d3.json('/api/v1.0/lastweeks').then(lastWeeks => {
+        // Initialize select with options
+        var years = lastWeeks.map(d => d['year']).reverse();
+        var formSelect = d3.select('#years');
+        formSelect
+            .selectAll('option')
+            .data(years)
+            .join('option')
+            .attr('value', d => d)
+            .text(d => d)
+        formSelect.property('value', years[0]);
 
-var LinePlot = d3.select('#line');
+        // Set event handler
+        formSelect.on('change', function() { console.log(this.value); renderLineChart(this.value) });
 
-LinePlot.on('plotly_hover', function(data){
-    var update = {'opacity':1};
-    Plotly.restyle('line', update, [tn]);
-  });
+        // Create start chart
+        renderLineChart(years[0]);
+    });
+}
+
+initLineChart();
+
+// var LinePlot = d3.select('#line');
+
+// LinePlot.on('plotly_hover', function(data){
+//     var update = {'opacity':1};
+//     Plotly.restyle('line', update, [tn]);
+//   });
+
