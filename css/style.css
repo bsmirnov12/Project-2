@@ -1,6 +1,3 @@
-@viewport {
-  zoom: 1;
-}
 
 /* Simple dashboard grid CSS */
 body {
@@ -254,4 +251,3 @@ body {
         opacity: 0;
   }
 }
-
