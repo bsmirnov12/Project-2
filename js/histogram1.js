@@ -1,12 +1,12 @@
 // by song weeks (distribution of length in chart)
 
- //Read api
- d3.json("/api/v1.0/weekshist").then(songData => {
-    
-    // Visibility control
-    let weeksHistogram = d3.select('#histogram1');
-    weeksHistogram.style('visibility', 'hidden');
+// Visibility control
+let weeksHistogram = d3.select('#histogram1');
+weeksHistogram.style('visibility', 'hidden');
 
+//Read api
+d3.json("/api/v1.0/weekshist").then(songData => {
+    
     //console.log(songData);
     var ending_value = Math.max(songData);
     //console.log(ending_value);
@@ -33,8 +33,9 @@
         }
     };
 
-    Plotly.newPlot('histogram1', data, layout);
+    return Plotly.newPlot('histogram1', data, layout);
 
+}).then(function() {
     // Rendering complete. Hide wait indicator, show the chart
     var weeksWaiter = d3.select('#weeks-waiter');
     weeksWaiter.style('display', 'none');

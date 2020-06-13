@@ -1,12 +1,12 @@
 // by Song score
 
+// Visibility control
+let scoresHistogram = d3.select('#histogram2');
+scoresHistogram.style('visibility', 'hidden');
+
 //Read api
 d3.json("/api/v1.0/tophist").then(songData => {
     
-    // Visibility control
-    let scoresHistogram = d3.select('#histogram2');
-    scoresHistogram.style('visibility', 'hidden');
-
     // console.log(songData);
 
     var data = [{
@@ -34,10 +34,12 @@ d3.json("/api/v1.0/tophist").then(songData => {
         }
     };
       
-    Plotly.newPlot('histogram2', data, layout);
+    return Plotly.newPlot('histogram2', data, layout);
 
+}).then(function() {
     // Rendering complete. Hide wait indicator, show the chart
     var scoresWaiter = d3.select('#scores-waiter');
     scoresWaiter.style('display', 'none');
     scoresHistogram.style('visibility', 'visible');
+
 });

@@ -5,7 +5,6 @@ var artistWaiter = d3.select('#artist-waiter');
 var artistCard = d3.selectAll('.artist-card');
 artistCard.style('visibility', 'hidden');
 
-
 // define button for form
 function init() {
     
@@ -28,7 +27,7 @@ function init() {
             // console.log(data['artist_id'].map(artist_id => artist_info[artist_id]))
 
             var data2 = [{
-                hovertemplate: `$Artist: %{y} <br>Rating: %{x}`,
+                hovertemplate: "Artist: %{y} <br>Rating: %{x}",
                 x: data['total_score'].reverse(),
                 y: data['artist_id'].map(artist_id => artist_info[artist_id]['name']).reverse(),
                 type: 'bar',
@@ -45,12 +44,14 @@ function init() {
                 margin: 200
             };
           
-            Plotly.newPlot('Artist_bar', data2, layout);
-
+            return Plotly.newPlot('Artist_bar', data2, layout);
+        })
+        .then(function() {
             // Rendering complete. Hide wait indicator, show the chart
             artistWaiter.style('visibility', 'hidden');
             artistChart.style('visibility', 'visible');
             artistCard.style('visibility', 'visible');
+
         });
     }
 
@@ -72,7 +73,7 @@ function renderBarchart(selected) {
     artistWaiter.style('visibility', 'visible');
     
     // based on selected value change input for dynamic query
-    if (selected== 'Artists'){
+    if (selected== 'Artist'){
         input=0
     }
     else{
@@ -113,8 +114,9 @@ function renderBarchart(selected) {
                 barmode: 'group'
             };
           
-            Plotly.newPlot('Artist_bar', data2, layout);
-
+            return Plotly.newPlot('Artist_bar', data2, layout);
+        })
+        .then(function() {
             // Rendering complete. Hide wait indicator, show the chart
             artistWaiter.style('visibility', 'hidden');
             artistChart.style('visibility', 'visible');

@@ -54,10 +54,41 @@ function renderLineChart(year) {
                     width:1,
                     color: color
                 },
-                opacity:0.5
+                opacity: 0.75
             }
 
             data.push(trace);
+        });
+
+        // All this fuss is only for putting the color bar on the side
+        // Create small range for colorscale generation
+        let range = d3.range(1, maxWeeks, 10);
+        range.push(maxWeeks);
+        // Generate colorscale: array of colors corresponding to numbers. Numbers 0(min) and 1(max) are mandatory
+        let colorscale = range.map(n => [(n-1)/maxWeeks, coloriser(n-1).hex()]) // [0, 1)
+        colorscale.push([1, coloriser(maxWeeks).hex()]); // [1]
+        // Remove first and last numbers - this way our fake trace won't spoil the axis
+        range.shift();
+        //range.pop();
+        // Now generating fake trace with transparent markers colord the same way colord our lines
+        // This fake trace generates the color bar
+        data.push({
+            type: 'scatter',
+            mode: 'markers',
+            marker: {
+                opacity: 0,
+                color: range,
+                colorscale: colorscale,
+                showscale: true,
+                colorbar: {
+                    thickness: 20,
+                    ticks: 'outside',
+                    ticklen: 3,
+                    title: { text: 'Weeks in Top 100', side: 'right' }
+                }
+            },
+            x: range,
+            y: range.map(n => 0)
         });
 
         // define layout object
@@ -71,6 +102,7 @@ function renderLineChart(year) {
                 tickmode: 'linear',
                 ticks: 'outside',
                 position: 0.05,
+                range: [1, maxWeeks],
                 tick0: 0,
                 dtick: 10,
                 ticklen: 7,
@@ -94,8 +126,9 @@ function renderLineChart(year) {
             
         };
         
-        Plotly.react('line', data, layout);
-
+        return Plotly.react('line', data, layout);
+    })
+    .then(function() {
         // Rendering complete. Hide wait indicator, show the chart
         lineWaiter.style('visibility', 'hidden');
         lineChart.style('visibility', 'visible');
@@ -118,7 +151,7 @@ function initLineChart() {
         formSelect.property('value', years[0]);
 
         // Set event handler
-        formSelect.on('change', function() { console.log(this.value); renderLineChart(this.value) });
+        formSelect.on('change', function() { renderLineChart(this.value) });
 
         // Create start chart
         renderLineChart(years[0]);
@@ -126,11 +159,3 @@ function initLineChart() {
 }
 
 initLineChart();
-
-// var LinePlot = d3.select('#line');
-
-// LinePlot.on('plotly_hover', function(data){
-//     var update = {'opacity':1};
-//     Plotly.restyle('line', update, [tn]);
-//   });
-
