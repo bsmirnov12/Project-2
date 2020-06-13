@@ -1,3 +1,7 @@
+@viewport {
+  zoom: 1;
+}
+
 /* Simple dashboard grid CSS */
 body {
     margin: 0;
