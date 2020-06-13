@@ -29,32 +29,32 @@
 * Description:
     * returns information about a song with a given song id
     * also includes an array of performers (see ['Artist Information'](#artist-information) endpoint)
-* Example: (http://localhost:8000/api/v1.0/song/1)
+* Example: (http://localhost:8000/api/v1.0/song/14)
 ```JSON
 {
   "song_name": "Stuck With U", 
   "performed_by": "Ariana Grande and Justin Bieber", 
-  "id": 1, 
+  "id": 14, 
   "performers": [
     {
-      "genre": "Pop", 
-      "name": "Ariana Grande", 
-      "wiki": "https://en.wikipedia.org/wiki/Ariana_Grande", 
-      "origin": "Boca Raton, Florida", 
       "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Ariana_Grande_Grammys_Red_Carpet_2020.png/220px-Ariana_Grande_Grammys_Red_Carpet_2020.png", 
-      "id": 1, 
       "is_band": 0, 
-      "dob": "1993-06-26"
+      "dob": "1993-06-26", 
+      "id": 6, 
+      "name": "Ariana Grande", 
+      "genre": "Pop", 
+      "wiki": "https://en.wikipedia.org/wiki/Ariana_Grande", 
+      "origin": "Boca Raton, Florida, U.S."
     }, 
     {
-      "genre": "Pop", 
-      "name": "Justin Bieber", 
-      "wiki": "https://en.wikipedia.org/wiki/Justin_Bieber", 
-      "origin": "[1]", 
       "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Justin_Bieber_in_2015.jpg/220px-Justin_Bieber_in_2015.jpg", 
-      "id": 2, 
       "is_band": 0, 
-      "dob": "1994-03-01"
+      "dob": "1994-03-01", 
+      "id": 9, 
+      "name": "Justin Bieber", 
+      "genre": "Pop", 
+      "wiki": "https://en.wikipedia.org/wiki/Justin_Bieber", 
+      "origin": "London, Ontario, Canada"
     }
   ]
 }

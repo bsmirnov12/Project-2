@@ -71,13 +71,16 @@ function renderBarchart(selected) {
     // Hide the chart and show "Rendering..." instead
     artistChart.style('visibility', 'hidden');
     artistWaiter.style('visibility', 'visible');
-    
+
+    let label = ""
     // based on selected value change input for dynamic query
-    if (selected== 'Artist'){
-        input=0
+    if (selected== 'Artists'){
+        input=0;
+        label = 'Artist';
     }
     else{
-        input=1
+        input=1;
+        label = 'Band';
     }
     // console.log(input)
     var data = [], artist_info = {};
@@ -98,7 +101,7 @@ function renderBarchart(selected) {
             // console.log(data['artist_id'].map(artist_id => artist_info[artist_id]))
 
             var data2 = [{
-                hovertemplate: `${selected}: %{y} <br>Rating: %{x}`,
+                hovertemplate: `${label}: %{y} <br>Rating: %{x}`,
                 x: data['total_score'].reverse(),
                 y: data['artist_id'].map(artist_id => artist_info[artist_id]['name']).reverse(),
                 type: 'bar',
@@ -107,14 +110,14 @@ function renderBarchart(selected) {
                 orientation: 'h'
             }]
             var layout = {
-                title:'Top 10 Artists',
+                title: `Top 10 ${label}s`,
                 xaxis: { title: "Rating"},
-                yaxis: {title: "Artist",tickangle: -45},
+                yaxis: {title: `${label}`, tickangle: -45},
                 hovermode:'closest',
                 barmode: 'group'
             };
           
-            return Plotly.newPlot('Artist_bar', data2, layout);
+            return Plotly.react('Artist_bar', data2, layout);
         })
         .then(function() {
             // Rendering complete. Hide wait indicator, show the chart
