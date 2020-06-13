@@ -90,6 +90,14 @@
           
           <div class="main-cards">
             <div class="card">
+              <div id="infobox">
+                <h2>Welcome to Music World!</h2>
+                <h3>Explore our dashboard to discover trends in the Canadian Top 100 music charts</h3>
+                
+                
+              </div>
+            </div>
+            <div class="card">
               <form>
                   <div class="form-group">
                       <select id="years" class="form-control">
@@ -98,6 +106,7 @@
               </form>
               <div id="line"></div>
             </div>
+            
             <div class="card">
               <div id="histogram1"></div>
             </div>
@@ -108,7 +117,32 @@
               <div id="scatter"></div>
             </div>
             <div class="card">
+              <form>
+                <div class="form-group">
+                  <label for="artist">Select: Artists or Bands</label>
+                    <select id="artistInput" class="form-control text-muted">
+                      <option>Artist</option>
+                      <option>Band</option>
+                    </select>
+                </div>
+            </form>
               <div id="Artist_bar"></div>
+          
+                
+                  <ul>
+                    <li>Song score: Each week, every song is awarded points (0-101) for its position on chart</li>
+                      <ul>
+                        <li>Top song= 100 pts/week</li>
+                      </ul>
+                    <li>Rating: Metric to calculate an artist's success. Sum of artist's song scores  </li>
+                    <ul>
+                      <li>Top 10= Artists with multiple successful songs (volume and duration on chart) </li>
+                    </ul>
+                
+
+                </ul>
+              
+              
             </div>
           </div>
 

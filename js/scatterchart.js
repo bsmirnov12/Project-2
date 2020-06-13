@@ -14,32 +14,33 @@
         weeksInChart.push(song["week_count"])
         highestPosition.push(song["top_position"]);
     });
-   
-    var data = [{
-        x: highestPosition,
-        y: weeksInChart,
-        type: 'scatter',
-        text:songId,
-        mode: 'markers'
-    }]
-    
-    var layout = {
-        title:'Weeks on chart vs. Highest Ranking',
-        xaxis: { title: "Weeks in chart"},
-        yaxis: {title: "Highest Ranking"},
-        hovermode:'closest'
-    };
+       
+    var myPlot = document.getElementById('scatter'),
+        hoverInfo = document.getElementById('hoverinfo'),
+        data = [{
+            x: weeksInChart,
+            y: highestPosition,
+            type: 'scatter',
+            text:songId,
+            marker: {
+                color: 'lightblue'},
+            mode: 'markers'}];
+        layout = {
+            title:'Weeks on chart vs. Highest Ranking',
+            xaxis: { title: "Weeks in chart"},
+            yaxis: {title: "Highest Ranking"},
+            hovermode:'closest'};
   
     Plotly.newPlot('scatter', data, layout);
-    });
-
-    // myPlot.on('plotly_hover', function(data) {
-        
-    //     // (d3.json(`api/v1.0/song/${data.text}`).then(info =>{
-    //     //     return info["song_name"];}))
-
-    //     hoverInfo.innerHTML = "hello";
-    // })
-    //  .on('plotly_unhover', function(data){
-    //     hoverInfo.innerHTML = '';
-    // });
+    
+//     myPlot.on('plotly_hover', function(data){
+//         var infotext = data.points.map(function(d){
+//             var some=d3.json(`/api/v1.0/song/${d.data.text}`).then(info => {return info["name"]; });
+//             return some
+//         });\
+//         hoverInfo.innerHTML = infotext.join('<br/>');
+//     })
+//     .on('plotly_unhover', function(data){
+//         hoverInfo.innerHTML = '';
+//     });
+});
