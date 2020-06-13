@@ -13,7 +13,7 @@
     var trace = {
         histfunc: 'count',
         x: songData,
-        xbins: {'end':ending_value, 'size':5, 'start': starting_value},
+        xbins: {'end':ending_value, 'size':5, 'start': 1},
         type: 'histogram'
     };
 
