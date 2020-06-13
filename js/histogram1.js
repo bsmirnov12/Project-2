@@ -6,19 +6,20 @@
 
     console.log(songData);
     var ending_value = Math.max(songData);
-    var starting_value = Math.min(songData);
     console.log(ending_value);
-    console.log(starting_value);
 
     var trace = {
         histfunc: 'count',
         x: songData,
         xbins: {'end':ending_value, 'size':5, 'start': 1},
-        type: 'histogram'
+        type: 'histogram',
+        marker: {
+            color: 'lightblue'}
     };
 
     var layout = {
         title: "Distribution of Songs by Weeks they were in Top 100",
+        bargap: 0.01,
         xaxis: {
             title: "Number of Weeks in Top 100",
             ticks: 'outside'
